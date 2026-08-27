@@ -89,3 +89,19 @@ with col2:
 with col3:
     st.write("⚠️ **Dispute Detection**")
     st.write("Detect mismatches and potential disputes.")
+from app.payment_matching import match_payments
+
+st.divider()
+
+st.header("💳 Payment Matching")
+
+st.write("Automatically match customer payments with invoices.")
+
+if st.button("🔍 Match Payments"):
+    results = match_payments()
+
+    if results:
+        st.success("Payment matching completed successfully!")
+        st.dataframe(results, use_container_width=True)
+    else:
+        st.info("No payments found.")
