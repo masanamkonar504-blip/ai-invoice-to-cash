@@ -103,7 +103,7 @@ if st.button("🔍 Match Payments"):
 
     if results:
         st.success("Payment matching completed successfully!")
-        st.dataframe(results, use_container_width=True)
+        st.dataframe(results, width="stretch")
     else:
         st.info("No payments found.")
 from app.dispute_detection import detect_disputes
@@ -119,6 +119,6 @@ if st.button("🔎 Detect Disputes"):
 
     if disputes:
         st.warning("Potential disputes detected!")
-        st.dataframe(disputes, use_container_width=True)
+        st.dataframe(disputes, width="stretch")
     else:
         st.success("No payment disputes detected.")
