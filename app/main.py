@@ -106,3 +106,19 @@ if st.button("🔍 Match Payments"):
         st.dataframe(results, use_container_width=True)
     else:
         st.info("No payments found.")
+from app.dispute_detection import detect_disputes
+
+st.divider()
+
+st.header("⚠️ AI Dispute Detection")
+
+st.write("Detect invoice and payment mismatches automatically.")
+
+if st.button("🔎 Detect Disputes"):
+    disputes = detect_disputes()
+
+    if disputes:
+        st.warning("Potential disputes detected!")
+        st.dataframe(disputes, use_container_width=True)
+    else:
+        st.success("No payment disputes detected.")
