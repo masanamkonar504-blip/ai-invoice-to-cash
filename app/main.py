@@ -144,6 +144,8 @@ if st.button("✅ Validate Invoices"):
         st.info("No invoices found.")
 st.divider()
 
+st.divider()
+
 st.header("📤 Invoice Upload")
 
 st.write("Upload invoice data in CSV format.")
@@ -168,3 +170,85 @@ if uploaded_file is not None:
     )
 
     st.write(f"Total records uploaded: {len(invoice_data)}")
+
+    if st.button("💾 Save Valid Invoices"):
+
+        required_columns = [
+            "invoice_number",
+            "customer_name",
+            "amount",
+            "tax",
+            "total_amount",
+            "status"
+        ]
+
+        missing_columns = [
+            column
+            for column in required_columns
+            if column not in invoice_data.columns
+        ]
+
+        if missing_columns:
+            st.error(
+                "Missing columns: "
+                + ", ".join(missing_columns)
+            )
+
+        else:
+            db = SessionLocal()
+
+            saved_count = 0
+            skipped_count = 0
+
+            for _, row in invoice_data.iterrows():
+
+                existing_invoice = (
+                    db.query(Invoice)
+                    .filter(
+                        Invoice.invoice_number
+                        == str(row["invoice_number"])
+                    )
+                    .first()
+                )
+
+                if existing_invoice:
+                    skipped_count += 1
+                    continue
+
+                expected_total = round(
+                    float(row["amount"]) + float(row["tax"]),
+                    2
+                )
+
+                uploaded_total = round(
+                    float(row["total_amount"]),
+                    2
+                )
+
+                if abs(expected_total - uploaded_total) > 0.01:
+                    skipped_count += 1
+                    continue
+
+                invoice = Invoice(
+                    invoice_number=str(row["invoice_number"]),
+                    customer_name=str(row["customer_name"]),
+                    amount=float(row["amount"]),
+                    tax=float(row["tax"]),
+                    total_amount=float(row["total_amount"]),
+                    status=str(row["status"])
+                )
+
+                db.add(invoice)
+                saved_count += 1
+
+            db.commit()
+            db.close()
+
+            st.success(
+                f"✅ {saved_count} invoice(s) saved successfully!"
+            )
+
+            if skipped_count > 0:
+                st.warning(
+                    f"⚠️ {skipped_count} invoice(s) skipped."
+                )
