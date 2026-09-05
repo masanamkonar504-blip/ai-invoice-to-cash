@@ -142,3 +142,29 @@ if st.button("✅ Validate Invoices"):
         )
     else:
         st.info("No invoices found.")
+st.divider()
+
+st.header("📤 Invoice Upload")
+
+st.write("Upload invoice data in CSV format.")
+
+uploaded_file = st.file_uploader(
+    "Choose an invoice CSV file",
+    type=["csv"]
+)
+
+if uploaded_file is not None:
+    import pandas as pd
+
+    invoice_data = pd.read_csv(uploaded_file)
+
+    st.success("Invoice file uploaded successfully!")
+
+    st.write("### 📋 Invoice Preview")
+
+    st.dataframe(
+        invoice_data,
+        width="stretch"
+    )
+
+    st.write(f"Total records uploaded: {len(invoice_data)}")
