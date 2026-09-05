@@ -1,7 +1,7 @@
 import streamlit as st
 from sqlalchemy import text
 
-from app.database import engine, Base
+from app.database import engine, Base, SessionLocal
 from app.models import Customer, Invoice, Payment, Dispute
 
 
