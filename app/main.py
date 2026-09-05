@@ -122,3 +122,23 @@ if st.button("🔎 Detect Disputes"):
         st.dataframe(disputes, width="stretch")
     else:
         st.success("No payment disputes detected.")
+from app.invoice_processing import validate_invoices
+
+st.divider()
+
+st.header("📄 Invoice Processing & Validation")
+
+st.write("Validate invoices and detect calculation errors automatically.")
+
+if st.button("✅ Validate Invoices"):
+    invoices = validate_invoices()
+
+    if invoices:
+        st.success("Invoice validation completed!")
+
+        st.dataframe(
+            invoices,
+            width="stretch"
+        )
+    else:
+        st.info("No invoices found.")
