@@ -1,5 +1,6 @@
 from app.database import SessionLocal
 from app.models import Invoice, Payment
+from app.ai_matching import calculate_confidence
 
 
 def match_payments():
@@ -12,9 +13,10 @@ def match_payments():
 
         for payment in payments:
 
-            # First: match using invoice reference
             invoice = None
+            reference_match = False
 
+            # 1. Match using invoice reference
             if payment.reference:
                 invoice = (
                     db.query(Invoice)
@@ -24,7 +26,10 @@ def match_payments():
                     .first()
                 )
 
-            # Second: fallback to customer name
+                if invoice:
+                    reference_match = True
+
+            # 2. Fallback to customer name
             if invoice is None:
                 invoice = (
                     db.query(Invoice)
@@ -34,6 +39,7 @@ def match_payments():
                     .first()
                 )
 
+            # No invoice found
             if invoice is None:
                 payment.status = "Unmatched"
 
@@ -44,6 +50,8 @@ def match_payments():
                     "payment_amount": payment.amount,
                     "invoice_amount": 0,
                     "difference": payment.amount,
+                    "confidence": 0,
+                    "confidence_level": "Low",
                     "status": "Unmatched"
                 })
 
@@ -52,6 +60,15 @@ def match_payments():
             # Calculate difference
             difference = round(
                 abs(invoice.total_amount - payment.amount), 2
+            )
+
+            # Calculate AI confidence
+            confidence, confidence_level = calculate_confidence(
+                payment.customer_name,
+                invoice.customer_name,
+                payment.amount,
+                invoice.total_amount,
+                reference_match
             )
 
             # Exact payment
@@ -63,16 +80,16 @@ def match_payments():
 
                 status = "Matched"
 
-            # Partial payment
+            # Partial or different payment
             else:
                 payment.status = "Partial Match"
 
                 if payment.amount < invoice.total_amount:
                     invoice.status = "Partially Paid"
+                    status = "Partial Match"
                 else:
                     invoice.status = "Disputed"
-
-                status = "Partial Match"
+                    status = "Amount Mismatch"
 
             results.append({
                 "payment_id": payment.id,
@@ -81,6 +98,8 @@ def match_payments():
                 "payment_amount": payment.amount,
                 "invoice_amount": invoice.total_amount,
                 "difference": difference,
+                "confidence": confidence,
+                "confidence_level": confidence_level,
                 "status": status
             })
 
