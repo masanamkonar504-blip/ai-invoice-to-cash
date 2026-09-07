@@ -241,13 +241,14 @@ if uploaded_file is not None:
     if st.button("💾 Save Valid Invoices"):
 
         required_columns = [
-            "invoice_number",
-            "customer_name",
-            "amount",
-            "tax",
-            "total_amount",
-            "status"
-        ]
+    "invoice_number",
+    "customer_name",
+    "currency",
+    "amount",
+    "tax",
+    "total_amount",
+    "status"
+]
 
         missing_columns = [
             column
