@@ -66,17 +66,6 @@ st.divider()
 
 st.subheader("📊 Business Analytics")
 
-total_invoice_value = sum(
-    invoice.total_amount
-    for invoice in Invoice.query.all()
-)
-
-# Business Analytics
-
-st.divider()
-
-st.subheader("📊 Business Analytics")
-
 with engine.connect() as connection:
 
     total_invoice_value = connection.execute(
