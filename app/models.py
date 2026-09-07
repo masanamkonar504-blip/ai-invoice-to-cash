@@ -17,6 +17,7 @@ class Invoice(Base):
     id = Column(Integer, primary_key=True, index=True)
     invoice_number = Column(String, unique=True, nullable=False)
     customer_name = Column(String, nullable=False)
+    currency = Column(String, default="INR")
     amount = Column(Float, nullable=False)
     tax = Column(Float, default=0)
     total_amount = Column(Float, nullable=False)
@@ -28,6 +29,7 @@ class Payment(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     customer_name = Column(String, nullable=False)
+    currency = Column(String, default="INR")
     amount = Column(Float, nullable=False)
     reference = Column(String)
     status = Column(String, default="Unmatched")
