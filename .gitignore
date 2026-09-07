@@ -216,3 +216,11 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+# Project database
+*.db
+
+# Streamlit secrets
+.streamlit/secrets.toml
+
+# Environment variables
+.env
