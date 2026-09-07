@@ -2,6 +2,7 @@ import streamlit as st
 from sqlalchemy import text
 
 from app.database import engine, Base, SessionLocal
+from sqlalchemy import text
 from app.models import Customer, Invoice, Payment, Dispute
 
 
@@ -59,7 +60,84 @@ with col3:
 with col4:
     st.metric("Disputes", dispute_count)
 
+# Business Analytics
 
+st.divider()
+
+st.subheader("📊 Business Analytics")
+
+total_invoice_value = sum(
+    invoice.total_amount
+    for invoice in Invoice.query.all()
+)
+
+# Business Analytics
+
+st.divider()
+
+st.subheader("📊 Business Analytics")
+
+with engine.connect() as connection:
+
+    total_invoice_value = connection.execute(
+        text("SELECT COALESCE(SUM(total_amount), 0) FROM invoices")
+    ).scalar()
+
+    total_payment_value = connection.execute(
+        text("SELECT COALESCE(SUM(amount), 0) FROM payments")
+    ).scalar()
+
+    outstanding_value = max(
+        total_invoice_value - total_payment_value,
+        0
+    )
+
+    disputed_value = connection.execute(
+        text("""
+            SELECT COALESCE(SUM(difference), 0)
+            FROM disputes
+            WHERE status = 'Open'
+        """)
+    ).scalar()
+
+    if total_invoice_value > 0:
+        collection_rate = (
+            total_payment_value / total_invoice_value
+        ) * 100
+    else:
+        collection_rate = 0
+
+
+analytics_col1, analytics_col2, analytics_col3, analytics_col4 = st.columns(4)
+
+with analytics_col1:
+    st.metric(
+        "💰 Invoice Value",
+        f"₹{total_invoice_value:,.2f}"
+    )
+
+with analytics_col2:
+    st.metric(
+        "💳 Payments Received",
+        f"₹{total_payment_value:,.2f}"
+    )
+
+with analytics_col3:
+    st.metric(
+        "📌 Outstanding",
+        f"₹{outstanding_value:,.2f}"
+    )
+
+with analytics_col4:
+    st.metric(
+        "📈 Collection Rate",
+        f"{collection_rate:.1f}%"
+    )
+
+st.metric(
+    "⚠️ Open Dispute Value",
+    f"₹{disputed_value:,.2f}"
+)
 # Project status
 st.divider()
 
